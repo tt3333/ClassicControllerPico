@@ -1,0 +1,4 @@
+/firmware/.vscode/.cortex-debug.*.json
+/firmware/build/
+
+*.bak
