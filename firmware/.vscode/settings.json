@@ -1,0 +1,4 @@
+{
+    "cortex-debug.openocdPath": "${env:LOCALAPPDATA}/Arduino15/packages/rp2040/tools/pqt-openocd/1.5.0-b-c7bab52/bin/openocd.exe",
+    "cortex-debug.registerUseNaturalFormat": false
+}
