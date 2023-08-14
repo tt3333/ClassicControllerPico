@@ -214,6 +214,17 @@ void WMExtension::set_button_data(int bdl, int bdr, int bdu, int bdd,
 		WMExtension::registers[5] = rt;
 		WMExtension::registers[6] = ~_tmp1;
 		WMExtension::registers[7] = ~_tmp2;
+		WMExtension::registers[8] = 0;
+	} else if (WMExtension::registers[0xFE] == 0x02) {
+		WMExtension::registers[0] = lx;
+		WMExtension::registers[1] = rx;
+		WMExtension::registers[2] = ly;
+		WMExtension::registers[3] = ry;
+		WMExtension::registers[4] = 0;
+		WMExtension::registers[5] = lt;
+		WMExtension::registers[6] = rt;
+		WMExtension::registers[7] = ~_tmp1;
+		WMExtension::registers[8] = ~_tmp2;
 	} else {
 		lx = lx >> 2;
 		ly = ly >> 2;
@@ -230,6 +241,7 @@ void WMExtension::set_button_data(int bdl, int bdr, int bdu, int bdd,
 		WMExtension::registers[5] = ~_tmp2;
 		WMExtension::registers[6] = 0;
 		WMExtension::registers[7] = 0;
+		WMExtension::registers[8] = 0;
 	}
 }
 
