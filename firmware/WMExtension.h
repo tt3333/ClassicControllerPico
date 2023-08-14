@@ -22,7 +22,7 @@
 #ifndef WMEXTENSION_H_
 #define WMEXTENSION_H_
 
-#include <WProgram.h>
+#include <Arduino.h>
 
 class WMExtension {
 

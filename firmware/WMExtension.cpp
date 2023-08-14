@@ -19,7 +19,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <WProgram.h>
+#include <Arduino.h>
 #include <Wire.h>
 #include "WMExtension.h"
 #include "WMCrypt.h"
@@ -86,7 +86,7 @@ void WMExtension::setup_encryption() {
 }
 
 /*
- * Send 8 bytes data via Wire.send().
+ * Send 8 bytes data via Wire.write().
  * Supports Wiimote encryption, if enabled.
   */
 void WMExtension::send_data(uint8_t* data, uint8_t addr) {
@@ -104,9 +104,9 @@ void WMExtension::send_data(uint8_t* data, uint8_t addr) {
 			buffer[i] = (data[i] - WMCrypt::wm_ft[(addr + i) % 8]) ^ WMCrypt::wm_sb[(addr + i) % 8];
 		}
 
-		Wire.send(buffer, lim);
+		Wire.write(buffer, lim);
 	} else {
-		Wire.send(data, lim);
+		Wire.write(data, lim);
 	}
 }
 
@@ -117,16 +117,16 @@ void WMExtension::receive_bytes(int count) {
 
 	if (count == 1) {
 
-		WMExtension::address = Wire.receive();
+		WMExtension::address = Wire.read();
 
 		return;
 
 	} else if (count > 1) {
 
-		byte addr = Wire.receive();
+		byte addr = Wire.read();
 
 		for (int i = 1; i < count; i++) {
-			byte d = Wire.receive();
+			byte d = Wire.read();
 
 			// Wii is trying to disable encryption...
 			if(addr == 0xF0 && (d == 0x55 || d == 0xAA)) {
