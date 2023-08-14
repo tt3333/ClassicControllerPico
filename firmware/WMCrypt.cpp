@@ -1,5 +1,6 @@
 /*
-* Wii RetroPad Adapter - Nintendo Wiimote adapter for retro-controllers!
+* Classic Controller Pico
+* Copyright (c) 2023 T.T - tt3333@tt-server.net
 * Copyright (c) 2011 Bruno Freitas - bruno@brunofreitas.com
 * Copyright (C) 2008-2009 Héctor Martín <hector@marcansoft.com>
 *
