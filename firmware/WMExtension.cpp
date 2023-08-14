@@ -24,6 +24,8 @@
 #include "WMExtension.h"
 #include "WMCrypt.h"
 
+TwoWire* WMExtension::wire;
+
 /* Classic Controller ID */
 const byte WMExtension::id[6] = { 0x00, 0x00, 0xa4, 0x20, 0x01, 0x01 };
 
@@ -104,9 +106,9 @@ void WMExtension::send_data(uint8_t* data, uint8_t addr) {
 			buffer[i] = (data[i] - WMCrypt::wm_ft[(addr + i) % 8]) ^ WMCrypt::wm_sb[(addr + i) % 8];
 		}
 
-		Wire.write(buffer, lim);
+		WMExtension::wire->write(buffer, lim);
 	} else {
-		Wire.write(data, lim);
+		WMExtension::wire->write(data, lim);
 	}
 }
 
@@ -117,16 +119,16 @@ void WMExtension::receive_bytes(int count) {
 
 	if (count == 1) {
 
-		WMExtension::address = Wire.read();
+		WMExtension::address = WMExtension::wire->read();
 
 		return;
 
 	} else if (count > 1) {
 
-		byte addr = Wire.read();
+		byte addr = WMExtension::wire->read();
 
 		for (int i = 1; i < count; i++) {
-			byte d = Wire.read();
+			byte d = WMExtension::wire->read();
 
 			// Wii is trying to disable encryption...
 			if(addr == 0xF0 && (d == 0x55 || d == 0xAA)) {
@@ -234,9 +236,10 @@ void WMExtension::set_button_data(int bdl, int bdr, int bdu, int bdd,
  * Initializes Wiimote connection. Call this function in your
  * setup function.
  */
-void WMExtension::init() {
+void WMExtension::init(TwoWire* wire) {
 	byte calchecksum = 0;
 
+	WMExtension::wire = wire;
 	memset(WMExtension::registers, 0x00, 0x100);
 
 	// Set extension id on registers
@@ -261,10 +264,10 @@ void WMExtension::init() {
 	WMExtension::set_button_data(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, WMExtension::calibration_data[2], WMExtension::calibration_data[5], WMExtension::calibration_data[8], WMExtension::calibration_data[11], 0, 0, 0, 0);
 
 	// Join I2C bus
-	Wire.begin(0x52);
+	wire->begin(0x52);
 
-	Wire.onReceive(WMExtension::receive_bytes);
-	Wire.onRequest(WMExtension::handle_request);
+	wire->onReceive(WMExtension::receive_bytes);
+	wire->onRequest(WMExtension::handle_request);
 }
 
 

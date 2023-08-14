@@ -23,11 +23,13 @@
 #define WMEXTENSION_H_
 
 #include <Arduino.h>
+#include <Wire.h>
 
 class WMExtension {
 
 private:
 
+	static TwoWire* wire;
 	static const byte id[6];
 	static byte calibration_data[16];
 	static volatile byte address;
@@ -44,7 +46,7 @@ private:
 
 public:
 
-	static void init();
+	static void init(TwoWire* wire);
 	static void set_button_data_callback(CBackPtr cb);
 	static void set_button_data(int bdl, int bdr, int bdu, int bdd,
 		int ba, int bb, int bx, int by, int blt, int brt, int bminus, int bplus,
