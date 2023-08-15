@@ -190,20 +190,46 @@ void WMExtension::handle_request() {
  * Buffer encoding details:
  * http://wiibrew.org/wiki/Wiimote/Extension_Controllers/Classic_Controller
  */
+#if 0
 void WMExtension::set_button_data(int bdl, int bdr, int bdu, int bdd,
 		int ba, int bb, int bx, int by, int blt, int brt, int bminus, int bplus,
 		int bhome, byte lx, byte ly, byte rx, byte ry, int bzl, int bzr, int lt, int rt) {
 
-	byte _tmp1, _tmp2;
+	int buttons =
+		(bzl    ? 0 : 1 << 15) |
+		(bb     ? 0 : 1 << 14) |
+		(by     ? 0 : 1 << 13) |
+		(ba     ? 0 : 1 << 12) |
+		(bx     ? 0 : 1 << 11) |
+		(bzr    ? 0 : 1 << 10) |
+		(bdl    ? 0 : 1 <<  9) |
+		(bdu    ? 0 : 1 <<  8) |
+		(bdr    ? 0 : 1 <<  7) |
+		(bdd    ? 0 : 1 <<  6) |
+		(blt    ? 0 : 1 <<  5) |
+		(bminus ? 0 : 1 <<  4) |
+		(bhome  ? 0 : 1 <<  3) |
+		(bplus  ? 0 : 1 <<  2) |
+		(brt    ? 0 : 1 <<  1) |
+		1;
 
-	_tmp1 = ((bdr ? 1 : 0) << 7) | ((bdd ? 1 : 0) << 6) | ((blt ? 1 : 0)
-			<< 5) | ((bminus ? 1 : 0) << 4) | ((bplus ? 1 : 0) << 2)
-			| ((brt ? 1 : 0) << 1) | ((bhome ? 1 : 0) << 3);
+	WMExtension::set_button_data(buttons, lx, ly, rx, ry, lt, rt);
+}
+#endif
 
-	_tmp2 = ((bb ? 1 : 0) << 6) | ((by ? 1 : 0) << 5) | ((ba ? 1 : 0)
-			<< 4) | ((bx ? 1 : 0) << 3) | ((bdl ? 1 : 0) << 1) | (bdu ? 1
-			: 0) | ((bzl ? 1 : 0) << 7) | ((bzr ? 1 : 0) << 2);
+void WMExtension::set_button_data(int buttons)
+{
+	WMExtension::set_button_data(
+		buttons, 
+		WMExtension::calibration_data[2],
+		WMExtension::calibration_data[5],
+		WMExtension::calibration_data[8],
+		WMExtension::calibration_data[11],
+		buttons & (1 << 5) ? 0x00 : 0xFF,
+		buttons & (1 << 1) ? 0x00 : 0xFF);
+}
 
+void WMExtension::set_button_data(int buttons, byte lx, byte ly, byte rx, byte ry, int lt, int rt) {
 	// registers[0xFE] == 0x03: Read mode encoding used by the NES Classic Edition
 	if(WMExtension::registers[0xFE] == 0x03) {
 		WMExtension::registers[0] = lx;
@@ -212,8 +238,8 @@ void WMExtension::set_button_data(int bdl, int bdr, int bdu, int bdd,
 		WMExtension::registers[3] = ry;
 		WMExtension::registers[4] = lt;
 		WMExtension::registers[5] = rt;
-		WMExtension::registers[6] = ~_tmp1;
-		WMExtension::registers[7] = ~_tmp2;
+		WMExtension::registers[6] = lowByte(buttons);
+		WMExtension::registers[7] = highByte(buttons);
 		WMExtension::registers[8] = 0;
 	} else if (WMExtension::registers[0xFE] == 0x02) {
 		WMExtension::registers[0] = lx;
@@ -223,8 +249,8 @@ void WMExtension::set_button_data(int bdl, int bdr, int bdu, int bdd,
 		WMExtension::registers[4] = 0;
 		WMExtension::registers[5] = lt;
 		WMExtension::registers[6] = rt;
-		WMExtension::registers[7] = ~_tmp1;
-		WMExtension::registers[8] = ~_tmp2;
+		WMExtension::registers[7] = lowByte(buttons);
+		WMExtension::registers[8] = highByte(buttons);
 	} else {
 		lx = lx >> 2;
 		ly = ly >> 2;
@@ -237,8 +263,8 @@ void WMExtension::set_button_data(int bdl, int bdr, int bdu, int bdd,
 		WMExtension::registers[1] = ((rx & 0x06) << 5) | (ly & 0x3F);
 		WMExtension::registers[2] = ((rx & 0x01) << 7) | ((lt & 0x18) << 2) | (ry & 0x1F);
 		WMExtension::registers[3] = ((lt & 0x07) << 5) | (rt & 0x1F);
-		WMExtension::registers[4] = ~_tmp1;
-		WMExtension::registers[5] = ~_tmp2;
+		WMExtension::registers[4] = lowByte(buttons);
+		WMExtension::registers[5] = highByte(buttons);
 		WMExtension::registers[6] = 0;
 		WMExtension::registers[7] = 0;
 		WMExtension::registers[8] = 0;
@@ -274,7 +300,7 @@ void WMExtension::init(TwoWire* wire) {
 	}
 
 	// Initialize buttons_data, otherwise, "Up+Right locked" bug...
-	WMExtension::set_button_data(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, WMExtension::calibration_data[2], WMExtension::calibration_data[5], WMExtension::calibration_data[8], WMExtension::calibration_data[11], 0, 0, 0, 0);
+	WMExtension::set_button_data(0xFFFF);
 
 	// Join I2C bus
 	wire->begin(0x52);
