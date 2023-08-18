@@ -4,6 +4,8 @@
 #include "WMExtension.h"
 
 #ifdef DEBUG
+	static unsigned long lastTime;
+
 	#define DEBUG_SET_TX()		UART.setTX(PIN_UART_TX)
 	#define DEBUG_SET_RX()		UART.setRX(PIN_UART_RX)
 	#define DEBUG_BEGIN()		UART.begin(UART_BAUDRATE)
@@ -25,7 +27,16 @@ static void button_data_callback()
 
 	int buttons = GET_BUTTONS();
 	WMExtension::set_button_data(buttons);
-	DEBUG_PRINTF("%04X\r\n", buttons);
+
+#ifdef DEBUG
+	unsigned long now = millis();
+	unsigned long elapsed = now - lastTime;
+	if (elapsed > 16)
+	{
+		DEBUG_PRINTF("%lu\r\n", elapsed);
+	}
+	lastTime = now;
+#endif
 
 	digitalWrite(LED_BUILTIN, LOW);
 }
@@ -73,6 +84,9 @@ void loop()
 			delay(DETECT_WAIT);
 			if (digitalRead(PIN_3V3) == HIGH)
 			{
+#ifdef DEBUG
+				lastTime = millis();
+#endif
 				WMExtension::init(&I2C);
 				ready = true;
 				DEBUG_WRITE("connect\r\n");
