@@ -2,7 +2,7 @@
 
 //#define DEBUG
 
-#define GET_BUTTONS()	(gpio_get_all() | 0x00000001)
+#define GET_BUTTONS()	(gpio_get_all() & 0x0000FFFE | 0x00000001)
 
 #define PIN_UART_TX		16
 #define PIN_UART_RX		17
