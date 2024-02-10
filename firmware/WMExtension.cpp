@@ -43,6 +43,9 @@ volatile byte WMExtension::address = 0;
 /* Tells whether encryption was setup (enabled) or not */
 volatile byte WMExtension::crypt_setup_done = 0;
 
+/* Classic Controller buttons status */
+byte WMExtension::buttons_data[8];
+
 /* Classic Controller 256 data registers */
 byte WMExtension::registers[0x100];
 
@@ -154,6 +157,10 @@ void WMExtension::receive_bytes(int count) {
 				crypt_keys_received = 1;
 			}
 
+			if (addr == 0xFE) {
+				WMExtension::set_button_data();
+			}
+
 			addr++;
 		}
 
@@ -230,41 +237,53 @@ void WMExtension::set_button_data(int buttons)
 }
 
 void WMExtension::set_button_data(int buttons, byte lx, byte ly, byte rx, byte ry, int lt, int rt) {
+	WMExtension::buttons_data[0] = lx;
+	WMExtension::buttons_data[1] = rx;
+	WMExtension::buttons_data[2] = ly;
+	WMExtension::buttons_data[3] = ry;
+	WMExtension::buttons_data[4] = lt;
+	WMExtension::buttons_data[5] = rt;
+	WMExtension::buttons_data[6] = lowByte(buttons);
+	WMExtension::buttons_data[7] = highByte(buttons);
+	WMExtension::set_button_data();
+}
+
+void WMExtension::set_button_data() {
 	// registers[0xFE] == 0x03: Read mode encoding used by the NES Classic Edition
 	if(WMExtension::registers[0xFE] == 0x03) {
-		WMExtension::registers[0] = lx;
-		WMExtension::registers[1] = rx;
-		WMExtension::registers[2] = ly;
-		WMExtension::registers[3] = ry;
-		WMExtension::registers[4] = lt;
-		WMExtension::registers[5] = rt;
-		WMExtension::registers[6] = lowByte(buttons);
-		WMExtension::registers[7] = highByte(buttons);
+		WMExtension::registers[0] = WMExtension::buttons_data[0];
+		WMExtension::registers[1] = WMExtension::buttons_data[1];
+		WMExtension::registers[2] = WMExtension::buttons_data[2];
+		WMExtension::registers[3] = WMExtension::buttons_data[3];
+		WMExtension::registers[4] = WMExtension::buttons_data[4];
+		WMExtension::registers[5] = WMExtension::buttons_data[5];
+		WMExtension::registers[6] = WMExtension::buttons_data[6];
+		WMExtension::registers[7] = WMExtension::buttons_data[7];
 		WMExtension::registers[8] = 0;
 	} else if (WMExtension::registers[0xFE] == 0x02) {
-		WMExtension::registers[0] = lx;
-		WMExtension::registers[1] = rx;
-		WMExtension::registers[2] = ly;
-		WMExtension::registers[3] = ry;
+		WMExtension::registers[0] = WMExtension::buttons_data[0];
+		WMExtension::registers[1] = WMExtension::buttons_data[1];
+		WMExtension::registers[2] = WMExtension::buttons_data[2];
+		WMExtension::registers[3] = WMExtension::buttons_data[3];
 		WMExtension::registers[4] = 0;
-		WMExtension::registers[5] = lt;
-		WMExtension::registers[6] = rt;
-		WMExtension::registers[7] = lowByte(buttons);
-		WMExtension::registers[8] = highByte(buttons);
+		WMExtension::registers[5] = WMExtension::buttons_data[4];
+		WMExtension::registers[6] = WMExtension::buttons_data[5];
+		WMExtension::registers[7] = WMExtension::buttons_data[6];
+		WMExtension::registers[8] = WMExtension::buttons_data[7];
 	} else {
-		lx = lx >> 2;
-		ly = ly >> 2;
-		rx = rx >> 3;
-		ry = ry >> 3;
-		lt = lt >> 3;
-		rt = rt >> 3;
+		int lx = WMExtension::buttons_data[0] >> 2;
+		int ly = WMExtension::buttons_data[2] >> 2;
+		int rx = WMExtension::buttons_data[1] >> 3;
+		int ry = WMExtension::buttons_data[3] >> 3;
+		int lt = WMExtension::buttons_data[4] >> 3;
+		int rt = WMExtension::buttons_data[5] >> 3;
 
 		WMExtension::registers[0] = ((rx & 0x18) << 3) | (lx & 0x3F);
 		WMExtension::registers[1] = ((rx & 0x06) << 5) | (ly & 0x3F);
 		WMExtension::registers[2] = ((rx & 0x01) << 7) | ((lt & 0x18) << 2) | (ry & 0x1F);
 		WMExtension::registers[3] = ((lt & 0x07) << 5) | (rt & 0x1F);
-		WMExtension::registers[4] = lowByte(buttons);
-		WMExtension::registers[5] = highByte(buttons);
+		WMExtension::registers[4] = WMExtension::buttons_data[6];
+		WMExtension::registers[5] = WMExtension::buttons_data[7];
 		WMExtension::registers[6] = 0;
 		WMExtension::registers[7] = 0;
 		WMExtension::registers[8] = 0;

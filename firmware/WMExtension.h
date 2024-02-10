@@ -33,6 +33,7 @@ private:
 	static TwoWire* wire;
 	static const byte id[6];
 	static byte calibration_data[16];
+	static byte buttons_data[8];
 	static volatile byte address;
 	static volatile byte crypt_setup_done;
 	static byte registers[0x100];
@@ -44,6 +45,7 @@ private:
 	static void send_data(uint8_t* data, uint8_t addr);
 	static void receive_bytes(int count);
 	static void handle_request();
+	static void set_button_data();
 
 public:
 
