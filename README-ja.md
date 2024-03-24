@@ -43,7 +43,7 @@ gerber.zip をアップロードしてください。
 * 現時点では、CN3は何も接続する必要はありません。<BR>
   (将来のバージョンアップでアナログスティックの接続に対応するかもしれません。)
 * CN4はファームウェアのデバッグ用なので、通常は何も接続する必要はありません。
-* Raspberry Pi PicoのBOOTSELボタンを押しながらUSBケーブルを接続し、firmware.ino.sf2を書き込んでください。
+* Raspberry Pi PicoのBOOTSELボタンを押しながらUSBケーブルを接続し、firmware.ino.uf2を書き込んでください。
 
 ![PCB](doc/PCB.png)
 

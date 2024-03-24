@@ -43,7 +43,7 @@ Upload gerber.zip.
 * At this time, CN3 does not need to be connected to anything.<BR>
   (A future version may support analog stick connection.)
 * CN4 is for debugging firmware, so normally nothing needs to be connected.
-* While pressing the BOOTSEL button on the Raspberry Pi Pico, connect the USB cable and write the firmware.ino.sf2.
+* While pressing the BOOTSEL button on the Raspberry Pi Pico, connect the USB cable and write the firmware.ino.uf2.
 
 ![PCB](doc/PCB.png)
 
